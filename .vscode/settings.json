@@ -1,0 +1,19 @@
+{
+  "C_Cpp.intelliSenseEngine": "Tag Parser",
+  "idf.port": "/dev/ttyUSB0",
+  "cmake.configureOnOpen": false,
+  "idf.adapterTargetName": "esp32",
+  "files.associations": {
+    "stdio.h": "c",
+    "freertos.h": "c",
+    "esp_log.h": "c",
+    "buzzer.h": "c",
+    "task.h": "c",
+    "chrono": "c",
+    "*.contiki": "c",
+    "*.lwip": "c",
+    "stdbool.h": "c",
+    "encoder_util.h": "c",
+    "*.tcc": "c"
+  }
+}

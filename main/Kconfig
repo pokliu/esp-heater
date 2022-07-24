@@ -1,0 +1,30 @@
+menu "Encoder Configuration"
+
+    config ENC_A_GPIO
+        int "Encoder A output GPIO number"
+        range 0 39
+        default 17
+        help
+            GPIO number (IOxx) from which to sample the Encoder 'A' output.
+    
+            Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+    
+    config ENC_B_GPIO
+        int "Encoder B output GPIO number"
+        range 0 39
+        default 16
+        help
+            GPIO number (IOxx) from which to sample the Encoder 'B' output.
+    
+            Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+
+    config ENC_SW_GPIO
+        int "Encoder SW output GPIO number"
+        range 0 39
+        default 19
+        help
+            GPIO number (IOxx) from which to sample the Encoder 'SW' output.
+    
+            Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
+    
+endmenu
