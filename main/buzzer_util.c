@@ -14,7 +14,7 @@ typedef struct
 
 static music_play_t mpt;
 
-TaskHandle_t music_task_handler;
+TaskHandle_t music_task_handler = NULL;
 
 // 停止音乐
 static void stop_music()
@@ -37,6 +37,7 @@ static void play_music(const void *parameter)
         {
             stop_music();
             vTaskDelete(NULL);
+            music_task_handler = NULL;
         }       
     }
 }
@@ -67,5 +68,10 @@ void start_play_music_task(tone_t* music, size_t len, bool loop)
 void stop_play_music_task()
 {
     stop_music();
-    vTaskDelete(music_task_handler);
+    if (music_task_handler != NULL)
+    {
+        vTaskDelete(music_task_handler);
+        music_task_handler = NULL;
+    }
+    
 }

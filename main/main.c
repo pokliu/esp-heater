@@ -12,17 +12,50 @@ extern int enc_diff;
 
 extern lv_group_t *group;
 
+
+typedef struct
+{
+  tone_t* scores;
+  size_t len;
+  char txt[16];  
+} album_music_t;
+
+static album_music_t album[3] = {
+        {
+            .scores = music_kdy,
+            .len = sizeof(music_xyz) / sizeof(tone_t),
+            .txt = "KFC psyduck"
+        },
+        {
+            .scores = music_twotiger,
+            .len = sizeof(music_twotiger) / sizeof(tone_t),
+            .txt = "Two tiger"
+        },
+        {
+            .scores = music_xyz,
+            .len = sizeof(music_xyz) / sizeof(tone_t),
+            .txt = "Young swallow"
+        },
+    };
+
 static void event_handler(lv_event_t * e)
 {
     lv_event_code_t code = lv_event_get_code(e);
+    size_t index = (size_t)lv_event_get_user_data(e);
 
     if(code == LV_EVENT_CLICKED) {
-        ESP_LOGI("LV", "CLICKED");
+        ESP_LOGI("LV", "CLICKED: %d", index);
+
+        stop_play_music_task();
+        start_play_music_task(album[index].scores, album[index].len, false);
     }
-    else if(code == LV_EVENT_VALUE_CHANGED) {
-        ESP_LOGI("LV", "CHANGED");
+    else if(code == LV_EVENT_FOCUSED) {
+        ESP_LOGI("LV", "FOCUSED: %d", index);
+        stop_play_music_task();
     }
 }
+
+
 
 void app_main(void)
 {
@@ -30,40 +63,33 @@ void app_main(void)
     initialize_music_player();
     initialize_encoder();
 
-    // start_play_music_task(music_kdy, sizeof(music_kdy) / sizeof(tone_t), false);
-    // vTaskDelay(15000 / portTICK_PERIOD_MS);
-    // stop_play_music_task();
-
     static lv_style_t style;
     lv_style_set_text_font(&style, &lv_font_montserrat_16);
     lv_style_set_text_color(&style, lv_color_black());
 
     lv_obj_t * scr = lv_disp_get_scr_act(NULL);
-    
+
+    lv_obj_t * btn;
     lv_obj_t * label;
 
-    lv_obj_t * btn1 = lv_btn_create(scr);
-    lv_obj_add_event_cb(btn1, event_handler, LV_EVENT_ALL, NULL);
-    lv_obj_set_size(btn1, 40, 50);
-    lv_obj_align(btn1, LV_ALIGN_CENTER, -40, 0);
+    const int width = 38;
 
-    label = lv_label_create(btn1);
-    lv_label_set_text(label, "A");
-    lv_obj_add_style(label, &style, 0);
-    lv_obj_center(label);
+    for (size_t i = 0; i < 3; i++)
+    {
+        album_music_t music =album[i];
+        btn = lv_btn_create(scr);
+        lv_obj_add_event_cb(btn, event_handler, LV_EVENT_ALL, i);
+        lv_obj_set_size(btn, width, 50);
+        lv_obj_align(btn, LV_ALIGN_LEFT_MID, i * (width + 4) + 4, 0);
 
-    lv_obj_t * btn2 = lv_btn_create(scr);
-    lv_obj_add_event_cb(btn2, event_handler, LV_EVENT_ALL, NULL);
-    lv_obj_set_size(btn2, 40, 50);
-    lv_obj_align(btn2, LV_ALIGN_CENTER, 40, 0);
-
-    label = lv_label_create(btn2);
-    lv_label_set_text(label, "B");
-    lv_obj_add_style(label, &style, 0);
-    lv_obj_center(label);
-
-    lv_group_add_obj(group, btn1);
-    lv_group_add_obj(group, btn2);
+        label = lv_label_create(btn);
+        lv_label_set_text(label, music.txt);
+        lv_obj_set_width(label, width);
+        lv_label_set_long_mode(label, LV_LABEL_LONG_SCROLL_CIRCULAR);
+        lv_obj_add_style(label, &style, 0);
+        lv_obj_center(label);
+    }
+    
 
     while(true)
     {

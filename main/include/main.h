@@ -42,4 +42,100 @@ tone_t music_kdy[] = {
     {MSCM6, E},
 };
 
+// 两只老虎
+tone_t music_twotiger[] = {
+    {MSCM1, Q},
+    {MSCM2, Q},
+    {MSCM3, Q},
+    {MSCM1, Q},
+
+    {MSCM1, Q},
+    {MSCM2, Q},
+    {MSCM3, Q},
+    {MSCM1, Q},
+
+    {MSCM3, Q},
+    {MSCM4, Q},
+    {MSCM5, H},
+
+    {MSCM3, Q},
+    {MSCM4, Q},
+    {MSCM5, H},
+
+    {MSCM5, E},
+    {MSCM6, E},
+    {MSCM5, E},
+    {MSCM4, E},
+    {MSCM3, Q},
+    {MSCM1, Q},
+
+    {MSCM5, E},
+    {MSCM6, E},
+    {MSCM5, E},
+    {MSCM4, E},
+    {MSCM3, Q},
+    {MSCM1, Q},
+
+    {MSCM3, Q},
+    {MSCL5, Q},
+    {MSCM1, H},
+
+    {MSCM3, Q},
+    {MSCL5, Q},
+    {MSCM1, H},
+};
+
+// 小燕子
+tone_t music_xyz[] = {
+    {MSCM3, E},
+    {MSCM5, E},
+    {MSCH1, E},
+    {MSCM6, E},
+    {MSCM5, H},
+
+    {MSCM3, E},
+    {MSCM5, E},
+    {MSCM6, E},
+    {MSCH1, E},
+    {MSCM5, H},
+
+    {MSCH1, Q+E},
+    {MSCH3, E},
+    {MSCH2, Q},
+    {MSCH1, Q},
+
+    {MSCH2, E},
+    {MSCH1, E},
+    {MSCM6, E},
+    {MSCH1, E},
+    {MSCM5, H},
+
+    {MSCM3, Q+E},
+    {MSCM5, E},
+    {MSCM6, Q},
+    {MSCM5, E},
+    {MSCM6, E},
+
+    {MSCH1, Q},
+    {MSCH2, E},
+    {MSCM5, E},
+    {MSCM6, H},
+
+    {MSCM3, E},
+    {MSCM2, E},
+    {MSCM1, Q},
+    {MSCM2, H},
+
+    {MSCM2, Q},
+    {MSCM2, E},
+    {MSCM3, E},
+    {MSCM5, Q},
+    {MSCM5, Q},
+
+    {MSCH1, Q},
+    {MSCM2, E},
+    {MSCM3, E},
+    {MSCM5, H},
+};
+
 #endif
