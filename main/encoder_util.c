@@ -39,54 +39,38 @@
 #define ENABLE_HALF_STEPS false  // Set to true to enable tracking of rotary encoder at half step resolution
 #define FLIP_DIRECTION    false  // Set to true to reverse the clockwise/counterclockwise sense
 
-int enc_diff = 0;
+// Initialise the rotary encoder device with the GPIOs for A and B signals
+rotary_encoder_info_t info = { 0 };
 
-void encoder_worker()
+bool IRAM_ATTR sw_press()
 {
-
-    // Initialise the rotary encoder device with the GPIOs for A and B signals
-    rotary_encoder_info_t info = { 0 };
-    ESP_ERROR_CHECK(rotary_encoder_init(&info, ROT_ENC_A_GPIO, ROT_ENC_B_GPIO));
-    ESP_ERROR_CHECK(rotary_encoder_enable_half_steps(&info, ENABLE_HALF_STEPS));
-#ifdef FLIP_DIRECTION
-    ESP_ERROR_CHECK(rotary_encoder_flip_direction(&info));
-#endif
-
-    // Create a queue for events from the rotary encoder driver.
-    // Tasks can read from this queue to receive up to date position information.
-    QueueHandle_t event_queue = rotary_encoder_create_queue();
-    ESP_ERROR_CHECK(rotary_encoder_set_queue(&info, event_queue));
-
-    while (1)
-    {
-        // Wait for incoming events on the event queue.
-        rotary_encoder_event_t event = { 0 };
-        if (xQueueReceive(event_queue, &event, 1000 / portTICK_PERIOD_MS) == pdTRUE)
-        {
-            enc_diff += event.state.position;
-            ESP_ERROR_CHECK(rotary_encoder_reset(&info));
-            ESP_LOGI(TAG, "ENC_DIFF: %d", enc_diff);
-        }
-    }
-    ESP_LOGE(TAG, "queue receive failed");
-
-    ESP_ERROR_CHECK(rotary_encoder_uninit(&info));
+    return gpio_get_level(ROT_ENC_SW_GPIO) == 0;
 }
 
-#define GPIO_INPUT_IO_0     0
-#define GPIO_INPUT_PIN_SEL  1ULL<<GPIO_INPUT_IO_0
+int32_t last_pos = 0;
+
+int IRAM_ATTR enc_diff()
+{
+    int diff = last_pos - info.state.position;
+    last_pos = info.state.position;
+    return diff;
+}
 
 void initialize_encoder()
 {
     // esp32-rotary-encoder requires that the GPIO ISR service is installed before calling rotary_encoder_register()
     ESP_ERROR_CHECK(gpio_install_isr_service(0));
 
-    xTaskCreate(
-        (TaskFunction_t)encoder_worker,
-        "encoder",
-        1024 * 8,
-        NULL,
-        0,
-        NULL
-    );
+    ESP_ERROR_CHECK(rotary_encoder_init(&info, ROT_ENC_A_GPIO, ROT_ENC_B_GPIO));
+    ESP_ERROR_CHECK(rotary_encoder_enable_half_steps(&info, ENABLE_HALF_STEPS));
+#ifdef FLIP_DIRECTION
+    ESP_ERROR_CHECK(rotary_encoder_flip_direction(&info));
+#endif
+
+    gpio_config_t sw_btn = {
+        .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_ENABLE,
+        .pin_bit_mask = (1ull << ROT_ENC_SW_GPIO)
+    };
+    gpio_config(&sw_btn);
 }

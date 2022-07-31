@@ -14,6 +14,11 @@
     "*.lwip": "c",
     "stdbool.h": "c",
     "encoder_util.h": "c",
-    "*.tcc": "c"
+    "*.tcc": "c",
+    "bitset": "c",
+    "random": "c",
+    "future": "c",
+    "system_error": "c",
+    "regex": "c"
   }
 }
