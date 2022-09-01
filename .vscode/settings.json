@@ -23,6 +23,15 @@
     "array": "c",
     "string": "c",
     "string_view": "c",
-    "list": "c"
+    "list": "c",
+    "i2c.h": "c",
+    "main.h": "c",
+    "ws2812.h": "c",
+    "stdint.h": "c",
+    "temperature.h": "c",
+    "max6675k.h": "c",
+    "spi_master.h": "c",
+    "*.inc": "c",
+    "rotary_encoder.h": "c"
   }
 }

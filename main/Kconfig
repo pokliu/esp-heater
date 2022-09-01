@@ -28,3 +28,27 @@ menu "Encoder Configuration"
             Some GPIOs are used for other purposes (flash connections, etc.) and cannot be used.
     
 endmenu
+
+menu "Temperature Configuration"
+
+    config PIN_NUM_MOSI
+        int "Temperature PIN_NUM_MOSI"
+        range 0 39
+        default 23
+
+    config PIN_NUM_MISO
+        int "Temperature PIN_NUM_MOSI"
+        range 0 39
+        default 19
+
+    config PIN_NUM_CLK
+        int "Temperature PIN_NUM_MOSI"
+        range 0 39
+        default 18
+
+    config PIN_NUM_CS
+        int "Temperature PIN_NUM_MOSI"
+        range 0 39
+        default 5
+    
+endmenu

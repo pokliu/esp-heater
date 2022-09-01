@@ -36,7 +36,7 @@
 #define ROT_ENC_B_GPIO (CONFIG_ENC_B_GPIO)
 #define ROT_ENC_SW_GPIO (CONFIG_ENC_SW_GPIO)
 
-#define ENABLE_HALF_STEPS false  // Set to true to enable tracking of rotary encoder at half step resolution
+#define ENABLE_HALF_STEPS true  // Set to true to enable tracking of rotary encoder at half step resolution
 #define FLIP_DIRECTION    false  // Set to true to reverse the clockwise/counterclockwise sense
 
 // Initialise the rotary encoder device with the GPIOs for A and B signals

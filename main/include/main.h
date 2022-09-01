@@ -4,6 +4,7 @@
 #include "buzzer_util.h"
 #include "lvgl_util.h"
 #include "encoder_util.h"
+#include "temperature.h"
 
 // 可达鸭音乐
 tone_t music_kdy[] = {
