@@ -32,6 +32,20 @@
     "max6675k.h": "c",
     "spi_master.h": "c",
     "*.inc": "c",
-    "rotary_encoder.h": "c"
+    "rotary_encoder.h": "c",
+    "ratio": "c",
+    "optional": "cpp",
+    "istream": "cpp",
+    "ostream": "cpp",
+    "functional": "cpp",
+    "tuple": "cpp",
+    "type_traits": "cpp",
+    "utility": "cpp",
+    "ledc.h": "c",
+    "*.ipp": "cpp",
+    "memory": "cpp",
+    "mini_pid_wrapper.h": "c",
+    "mini_pid.h": "c",
+    "mini_pid.hpp": "c"
   }
 }

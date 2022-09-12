@@ -5,6 +5,9 @@
 #include "esp_log.h"
 #include <string.h>
 
+#include "driver/ledc.h"
+#include "mini_pid_wrapper.h"
+
 #include "main.h"
 #include "ws2812.h"
 
@@ -63,8 +66,8 @@ static void event_handler(lv_event_t * e)
 void rainbow(void *pvParameters)
 {
   const uint8_t anim_step = 10;
-  const uint8_t anim_max = 250;
-  const uint8_t pixel_count = 64; // Number of your "pixels"
+  const uint8_t anim_max = 100;
+  const uint8_t pixel_count = 16; // Number of your "pixels"
   const uint8_t delay = 25; // duration between color changes
   rgbVal color = makeRGBVal(anim_max, 0, 0);
   uint8_t step = 0;
@@ -138,17 +141,17 @@ void app_main(void)
     initialize_temperature();
 
     static lv_style_t style;
-    lv_style_set_text_font(&style, &lv_font_montserrat_16);
-    lv_style_set_text_color(&style, lv_color_black());
+    lv_style_set_text_font(&style, &lv_font_montserrat_32);
+    // lv_style_set_text_color(&style, lv_color_black());
 
     lv_obj_t * scr = lv_disp_get_scr_act(NULL);
 
     lv_obj_t *label = lv_label_create(scr);
-    // lv_obj_add_style(label, &style, 0);
+    lv_obj_add_style(label, &style, 0);
     lv_label_set_text(label, "init");
     lv_obj_center(label);
 
-    start_play_music_task(album[0].scores, album[0].len, true);
+    // start_play_music_task(album[0].scores, album[0].len, true);
 
     // lv_obj_t * btn;
     // lv_obj_t * label;
@@ -170,14 +173,73 @@ void app_main(void)
     //     lv_obj_add_style(label, &style, 0);
     //     lv_obj_center(label);
     // }
+
+    #define PIN_FAN   GPIO_NUM_33
+    gpio_reset_pin(PIN_FAN);
+    gpio_set_direction(PIN_FAN, GPIO_MODE_OUTPUT);
+
+
+    #define PIN_HEAT  GPIO_NUM_26
+
+    ledc_timer_config_t heater_timer = {
+      .duty_resolution = LEDC_TIMER_13_BIT, // resolution of PWM duty
+      .freq_hz = 100,               // frequency of PWM signal
+      .speed_mode = LEDC_LOW_SPEED_MODE,      // timer mode
+      .timer_num = LEDC_TIMER_0       // timer index
+    };
+    ledc_timer_config(&heater_timer);
+
+    ledc_channel_config_t heater_channel = {
+      .channel = LEDC_CHANNEL_0,
+      .duty = 0,
+      .gpio_num = PIN_HEAT, //get_beep_io(),
+      .speed_mode = LEDC_LOW_SPEED_MODE,
+      .timer_sel = LEDC_TIMER_0
+    };
+    ledc_channel_config(&heater_channel);
+    ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 0);
+    ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+
     
+    void* mini_pid = MiniPIDInit(22.20, 1.08, 114.00);
+    MiniPIDsetMaxIOutput(mini_pid, 8096);
+
+
+    double target = 55;
 
     while(true)
     {
       char temp[6] = {0};
-      sprintf(temp, "%.2f", temperature);   
-      ESP_LOGI("TEMP", "%f", temperature);   
-        lv_label_set_text(label, temp);
-        vTaskDelay(100 /portTICK_PERIOD_MS);
+      sprintf(temp, "%.1f", temperature);   
+      // ESP_LOGI("TEMP", "%1f", temperature);   
+      lv_label_set_text(label, temp);
+
+      if (temperature > 50)
+      {
+        gpio_set_level(PIN_FAN, true);
+      }
+      if (temperature < 40)
+      {
+        gpio_set_level(PIN_FAN, false);
+      }
+      
+      // if (temperature > 55)
+      // {
+      //   ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 0);
+      //   ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+      // }
+      // if (temperature < 40)
+      // {
+      //   ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 8096 / 10);
+      //   ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+      // }
+      
+      double output=MiniPIDgetOutputAS(mini_pid, temperature, target);
+      ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, output);
+      ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+
+      ESP_LOGI("PID", "target: %.1f, sensor: %.1f, output: %.1f", target, temperature, output);
+
+      vTaskDelay(100 /portTICK_PERIOD_MS);
     }
 }
