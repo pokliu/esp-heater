@@ -19,6 +19,10 @@ double MiniPIDgetOutputAS(void* pid, double actual, double setpoint)
     return _MINIPID(pid)->getOutput(actual, setpoint);
 }
 
+void MiniPIDsetOutputLimitsMN(void* pid, double min, double max)
+{
+    return _MINIPID(pid)->setOutputLimits(min, max);
+}
 
 void MiniPIDsetMaxIOutput(void* pid, double output)
 {

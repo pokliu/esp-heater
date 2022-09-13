@@ -14,7 +14,7 @@ void MiniPIDsetPID(void* pid, double, double, double);
 void MiniPIDsetPIDF(void* pid, double, double, double, double);
 void MiniPIDsetMaxIOutput(void* pid, double output);
 void MiniPIDsetOutputLimits(void* pid, double);
-void MiniPIDsetOutputLimitsF(void* pid, double,double);
+void MiniPIDsetOutputLimitsMN(void* pid, double,double);
 void MiniPIDsetDirection(void* pid, bool);
 void MiniPIDsetSetpoint(void* pid, double);
 void MiniPIDreset(void* pid);

@@ -44,22 +44,22 @@ static album_music_t album[3] = {
         },
     };
 
-static void event_handler(lv_event_t * e)
-{
-    lv_event_code_t code = lv_event_get_code(e);
-    size_t index = (size_t)lv_event_get_user_data(e);
+// static void event_handler(lv_event_t * e)
+// {
+//     lv_event_code_t code = lv_event_get_code(e);
+//     size_t index = (size_t)lv_event_get_user_data(e);
 
-    if(code == LV_EVENT_CLICKED) {
-        ESP_LOGI("LV", "CLICKED: %d", index);
+//     if(code == LV_EVENT_CLICKED) {
+//         ESP_LOGI("LV", "CLICKED: %d", index);
 
-        stop_play_music_task();
-        start_play_music_task(album[index].scores, album[index].len, false);
-    }
-    else if(code == LV_EVENT_FOCUSED) {
-        ESP_LOGI("LV", "FOCUSED: %d", index);
-        stop_play_music_task();
-    }
-}
+//         stop_play_music_task();
+//         start_play_music_task(album[index].scores, album[index].len, false);
+//     }
+//     else if(code == LV_EVENT_FOCUSED) {
+//         ESP_LOGI("LV", "FOCUSED: %d", index);
+//         stop_play_music_task();
+//     }
+// }
 
 #define delay_ms(ms) vTaskDelay((ms) / portTICK_RATE_MS)
 
@@ -175,9 +175,6 @@ void app_main(void)
     // }
 
     #define PIN_FAN   GPIO_NUM_33
-    gpio_reset_pin(PIN_FAN);
-    gpio_set_direction(PIN_FAN, GPIO_MODE_OUTPUT);
-
 
     #define PIN_HEAT  GPIO_NUM_26
 
@@ -192,51 +189,60 @@ void app_main(void)
     ledc_channel_config_t heater_channel = {
       .channel = LEDC_CHANNEL_0,
       .duty = 0,
-      .gpio_num = PIN_HEAT, //get_beep_io(),
+      .gpio_num = PIN_HEAT,
       .speed_mode = LEDC_LOW_SPEED_MODE,
       .timer_sel = LEDC_TIMER_0
     };
     ledc_channel_config(&heater_channel);
-    ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 0);
-    ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+
+
+    ledc_timer_config_t fan_timer = {
+      .duty_resolution = LEDC_TIMER_12_BIT, // resolution of PWM duty
+      .freq_hz = 10000,               // frequency of PWM signal
+      .speed_mode = LEDC_LOW_SPEED_MODE,      // timer mode
+      .timer_num = LEDC_TIMER_1       // timer index
+    };
+    ledc_timer_config(&fan_timer);
+
+    ledc_channel_config_t fan_channel = {
+      .channel = LEDC_CHANNEL_1,
+      .duty = 0,
+      .gpio_num = PIN_FAN,
+      .speed_mode = LEDC_LOW_SPEED_MODE,
+      .timer_sel = LEDC_TIMER_1
+    };
+    ledc_channel_config(&fan_channel);
 
     
-    void* mini_pid = MiniPIDInit(22.20, 1.08, 114.00);
-    MiniPIDsetMaxIOutput(mini_pid, 8096);
+    void* mini_pid = MiniPIDInit(250, 0.2, 25);
+    MiniPIDsetOutputLimitsMN(mini_pid, -4095, 8191);
 
 
-    double target = 55;
+    double target = 110;
 
     while(true)
     {
       char temp[6] = {0};
-      sprintf(temp, "%.1f", temperature);   
-      // ESP_LOGI("TEMP", "%1f", temperature);   
+      sprintf(temp, "%.1f", temperature); 
       lv_label_set_text(label, temp);
-
-      if (temperature > 50)
-      {
-        gpio_set_level(PIN_FAN, true);
-      }
-      if (temperature < 40)
-      {
-        gpio_set_level(PIN_FAN, false);
-      }
       
-      // if (temperature > 55)
-      // {
-      //   ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 0);
-      //   ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
-      // }
-      // if (temperature < 40)
-      // {
-      //   ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 8096 / 10);
-      //   ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
-      // }
       
       double output=MiniPIDgetOutputAS(mini_pid, temperature, target);
-      ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, output);
-      ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+      if (output >= 0)
+      {
+        ledc_set_duty(fan_channel.speed_mode, fan_channel.channel, 0);
+        ledc_update_duty(fan_channel.speed_mode, fan_channel.channel);
+
+        ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, output);
+        ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+      } else {
+        ledc_set_duty(fan_channel.speed_mode, fan_channel.channel, -output);
+        ledc_update_duty(fan_channel.speed_mode, fan_channel.channel);
+        
+        ledc_set_duty(heater_channel.speed_mode, heater_channel.channel, 0);
+        ledc_update_duty(heater_channel.speed_mode, heater_channel.channel);
+      }
+      
 
       ESP_LOGI("PID", "target: %.1f, sensor: %.1f, output: %.1f", target, temperature, output);
 
